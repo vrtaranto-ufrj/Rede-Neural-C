@@ -12,5 +12,5 @@ struct MatrizStruct {
 
 Matriz * inicializa_matriz(size_t linhas, size_t colunas);
 void free_matriz(Matriz *matriz);
-float get_elemento(Matriz *matriz, size_t i, size_t j);
-void set_elemento(Matriz *matriz, size_t i, size_t j, float valor);
+float get_elemento_matriz(Matriz *matriz, size_t i, size_t j);
+void set_elemento_matriz(Matriz *matriz, size_t i, size_t j, float valor);

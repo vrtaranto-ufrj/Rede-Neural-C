@@ -21,7 +21,7 @@ void free_matriz(Matriz *matriz) {
     free(matriz);
 }
 
-float get_elemento(Matriz *matriz, size_t i, size_t j) {
+float get_elemento_matriz(Matriz *matriz, size_t i, size_t j) {
     // if (i >= matriz->linhas || j >= matriz->colunas) {
     //     return 0;
     // }
@@ -29,7 +29,7 @@ float get_elemento(Matriz *matriz, size_t i, size_t j) {
     return matriz->dados[i + j*matriz->colunas];
 }
 
-void set_elemento(Matriz *matriz, size_t i, size_t j, float valor) {
+void set_elemento_matriz(Matriz *matriz, size_t i, size_t j, float valor) {
     // if (i >= matriz->linhas || j >= matriz->colunas) {
     //     return;
     // }
