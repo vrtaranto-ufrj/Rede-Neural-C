@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdbool.h>
+
 #include "matriz.h"
 
 typedef struct RedeNeuralStruct RedeNeural;
@@ -18,6 +20,7 @@ struct RedeNeuralStruct {
     size_t num_neuronios;
 
     size_t *camada_neuronios;  // {0, 0, 1, 1, 1, 2, 2}
+    bool *is_bias;
     float (**funcoes_ativacao_neuronios)(float);
     float (**derivada_funcoes_ativacao_neuronios)(float);
     Matriz *pesos_neuronio;

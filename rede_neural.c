@@ -30,6 +30,13 @@ RedeNeural* cria_rede_neural(
         return NULL;
     }
 
+    rede_neural->is_bias = (bool *) calloc(sizeof(bool), rede_neural->num_neuronios);
+    if (rede_neural->is_bias == NULL) {
+        free(rede_neural->camada_neuronios);
+        free(rede_neural);
+        return NULL;
+    }
+
     size_t posicao_atual = 0, neuronios_camada;
     for (size_t i = 0; i < num_camadas; i++) {
         neuronios_camada = neuronios_por_camada[i];
@@ -37,8 +44,11 @@ RedeNeural* cria_rede_neural(
             neuronios_camada++;
         }
 
-        size_t final_camada = posicao_atual + neuronios_camada;
-        for (size_t j = posicao_atual; j < final_camada; j++) {
+        size_t final_camada = posicao_atual + neuronios_camada, posicao_inicial = posicao_atual;
+        for (size_t j = posicao_inicial; j < final_camada; j++) {
+            if (j == posicao_inicial && i != num_camadas - 1) {
+                rede_neural->is_bias[j] = true;
+            }
             rede_neural->camada_neuronios[j] = i;
             posicao_atual++;
         }
@@ -50,12 +60,15 @@ RedeNeural* cria_rede_neural(
     rede_neural->funcoes_ativacao_neuronios = (float(**)(float)) malloc(sizeof(float(*)(float)) * rede_neural->num_neuronios);
     if (rede_neural->funcoes_ativacao_neuronios == NULL) {
         free(rede_neural->camada_neuronios);
+        free(rede_neural->is_bias);
         free(rede_neural);
         return NULL;
     }
+
     rede_neural->derivada_funcoes_ativacao_neuronios = (float(**)(float)) malloc(sizeof(float(*)(float)) * rede_neural->num_neuronios);
     if (rede_neural->derivada_funcoes_ativacao_neuronios == NULL) {
         free(rede_neural->funcoes_ativacao_neuronios);
+        free(rede_neural->is_bias);
         free(rede_neural->camada_neuronios);
         free(rede_neural);
         return NULL;
@@ -70,9 +83,12 @@ RedeNeural* cria_rede_neural(
 
     size_t inicio_j = 0;
     for (size_t i = 0; i < rede_neural->num_neuronios; i++) {
-        for (size_t j = ++inicio_j; j < rede_neural->num_neuronios; j++) {
-            if (rede_neural->camada_neuronios[i] + 1 == rede_neural->camada_neuronios[j]) {
-                set_elemento_matriz(rede_neural->pesos_neuronio, i, j, (float) rand());  // arrumar o rand
+        for (size_t j = inicio_j++; j < rede_neural->num_neuronios; j++) {
+            if (
+                !rede_neural->is_bias[j] &&
+                rede_neural->camada_neuronios[i] + 1 == rede_neural->camada_neuronios[j]
+            ) {
+                set_elemento_matriz(rede_neural->pesos_neuronio, i, j, (float) rand() / (float) RAND_MAX * 2.0f - 1.0f);  // arrumar o rand
             }
         }
     }
