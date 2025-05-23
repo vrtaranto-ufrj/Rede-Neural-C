@@ -77,8 +77,11 @@ int main(int argc, char const *argv[]) {
     };
 
 
-    float (*func_ptr[])(float) = {retificadora, leaky, tangente_hiperbolica, sigmoidal, sigmoidal};
-    float (*d_func_ptr[])(float) = {d_retificadora, d_leaky, d_tangente_hiperbolica, d_sigmoidal, d_sigmoidal};
+    // float (*func_ptr[])(float) = {retificadora, leaky, tangente_hiperbolica, sigmoidal, sigmoidal};
+    // float (*d_func_ptr[])(float) = {d_retificadora, d_leaky, d_tangente_hiperbolica, d_sigmoidal, d_sigmoidal};
+
+    float (*func_ptr[])(float) = {retificadora, retificadora, retificadora, retificadora, retificadora};
+    float (*d_func_ptr[])(float) = {d_retificadora, d_retificadora, d_retificadora, d_retificadora, d_retificadora};
 
     // entrada
     
@@ -181,7 +184,6 @@ int main(int argc, char const *argv[]) {
                     W_saida[i][j] = W_linha_saida[i][j];
                 }
             }
-            int a = 0;
 
         }
     }
