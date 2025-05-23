@@ -9,6 +9,7 @@ int main(int argc, char const *argv[]) {
 
     printf("%lu, %lu, %lu\n", rede->num_entradas, rede->num_saidas, rede->num_neuronios);
 
+    print_matriz(rede->pesos_neuronio);
 
     return 0;
 }

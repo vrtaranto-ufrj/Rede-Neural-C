@@ -5,17 +5,11 @@
 #include "matriz.h"
 
 typedef struct RedeNeuralStruct RedeNeural;
-typedef struct NeuronioStruct Neuronio;
-
-
-struct NeuronioStruct {
-    float (*funcao_ativacao)(float);
-
-};
 
 struct RedeNeuralStruct {
     size_t num_entradas;
     size_t num_saidas;
+    size_t num_camadas;
 
     size_t num_neuronios;
 
@@ -35,4 +29,10 @@ RedeNeural* cria_rede_neural(
     size_t *neuronios_por_camada  // {2, 3, 2}
 );
 
-void fit_rede_neural(RedeNeural *rede_neural, Matriz *entrada, Matriz *saida);
+void fit_rede_neural(RedeNeural *rede_neural, Matriz *X_entrada, Matriz *Y_saida);
+void gerar_saida(
+    RedeNeural *rede_neural,
+    Matriz *X_entrada,
+    float *integracao_neuronios,
+    float *saida_neuronios
+);
