@@ -1,4 +1,5 @@
 #include <string.h>
+#include <math.h>
 
 #include "rede_neural.h"
 #include "utils.h"
@@ -22,6 +23,38 @@ void inicializa_pesos_random(RedeNeural *rede_neural) {
                 rede_neural->camada_neuronios[i] + 1 == rede_neural->camada_neuronios[j]
             ) {
                 set_elemento_matriz(rede_neural->pesos_neuronio, i, j, (float) rand() / (float) RAND_MAX * 2.0f - 1.0f);  // arrumar o rand
+            }
+        }
+    }
+}
+
+void inicializa_pesos_HE(RedeNeural *rede_neural) {
+    rede_neural->pesos_neuronio = inicializa_matriz(rede_neural->num_neuronios, rede_neural->num_neuronios);
+
+    size_t inicio_j = 0;
+    for (size_t i = 0; i < rede_neural->num_neuronios; i++) {
+        // Count incoming connections to calculate scaling factor
+        size_t fan_in = 0;
+        for (size_t k = 0; k < rede_neural->num_neuronios; k++) {
+            if (!rede_neural->is_bias[k] && 
+                rede_neural->camada_neuronios[k] + 1 == rede_neural->camada_neuronios[i]) {
+                fan_in++;
+            }
+        }
+        
+        // Use at least 1 to avoid division by zero
+        fan_in = fan_in > 0 ? fan_in : 1;
+        
+        // He initialization scale factor
+        float scale = sqrtf(2.0f / fan_in);
+        
+        for (size_t j = inicio_j++; j < rede_neural->num_neuronios; j++) {
+            if (!rede_neural->is_bias[j] &&
+                rede_neural->camada_neuronios[i] + 1 == rede_neural->camada_neuronios[j]) {
+                // He initialization (uniform variant)
+                float rand_val = (float)rand() / (float)RAND_MAX;  // [0,1]
+                float weight = (rand_val * 2.0f - 1.0f) * scale;   // [-scale,scale]
+                set_elemento_matriz(rede_neural->pesos_neuronio, i, j, weight);
             }
         }
     }
@@ -102,7 +135,7 @@ RedeNeural* cria_rede_neural(
         rede_neural->derivada_funcoes_ativacao_neuronios[i] = d_retificadora;    
     }
     
-    inicializa_pesos_random(rede_neural);
+    inicializa_pesos_HE(rede_neural);
 
     return rede_neural;
 }
@@ -152,7 +185,11 @@ void fit_rede_neural(RedeNeural *rede_neural, Matriz *X_entrada, Matriz *Y_saida
                 delta[neuronio_atual] = rede_neural->derivada_funcoes_ativacao_neuronios[neuronio_atual](integracao[neuronio_atual]) * erro;
 
                 for (size_t aresta = 0; aresta < rede_neural->num_neuronios; aresta++) {
-                    if (rede_neural->camada_neuronios[aresta] == rede_neural->camada_neuronios[neuronio_atual] - 1) {
+                    if (
+                        rede_neural->camada_neuronios[aresta] == rede_neural->camada_neuronios[neuronio_atual] - 1
+                        &&
+                        !rede_neural->is_bias[neuronio_atual]
+                    ) {
                         set_elemento_matriz(
                             pesos_temp,
                             aresta,

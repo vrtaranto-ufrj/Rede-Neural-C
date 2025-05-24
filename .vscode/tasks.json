@@ -12,6 +12,7 @@
                 "${fileDirname}/${fileBasenameNoExtension}",
                 "rede_neural.c",
                 "matriz.c",
+                "read_iris.c",
                 "-lm"
             ],
             "options": {
