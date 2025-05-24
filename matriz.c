@@ -68,7 +68,7 @@ void copiar_matriz(Matriz *matriz_origem, Matriz *matriz_destino) {
     }
 }
 
-Matriz * inicializa_matriz_copiar(Matriz *matriz_origem) {
+Matriz * inicializa_matriz_copia(Matriz *matriz_origem) {
     Matriz *matriz_destino = inicializa_matriz(matriz_origem->linhas, matriz_origem->colunas);
 
     copiar_matriz(matriz_origem, matriz_destino);

@@ -4,6 +4,7 @@
         "rede_neural.h": "c",
         "read_iris.h": "c",
         "matriz.h": "c",
-        "utils.h": "c"
+        "utils.h": "c",
+        "stdlib.h": "c"
     }
 }

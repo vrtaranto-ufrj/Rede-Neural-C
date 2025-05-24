@@ -12,6 +12,18 @@ float d_retificadora(float x) {
     return x >= 0 ? 1 : 0;
 }
 
+float sigmoidal(float x) {
+    float a = 5;
+    return 1 / (1 + expf(- a * x));
+}
+
+float d_sigmoidal(float x) {
+    float a = 5;
+    float resp_sigmoidal = sigmoidal(x);
+    return a * resp_sigmoidal * (1 - resp_sigmoidal);
+}
+
+
 void inicializa_pesos_random(RedeNeural *rede_neural) {
     rede_neural->pesos_neuronio = inicializa_matriz(rede_neural->num_neuronios, rede_neural->num_neuronios);
 
