@@ -30,14 +30,18 @@ float get_elemento_matriz(Matriz *matriz, size_t i, size_t j) {
     //     return 0;
     // }
 
-    return matriz->dados[i + j*matriz->colunas];
+    return matriz->dados[i + j*matriz->linhas];
+}
+
+float *get_ponteiro_elemento_matriz(Matriz *matriz, size_t i, size_t j) {
+    return &(matriz->dados[i + j*matriz->linhas]);
 }
 
 void set_elemento_matriz(Matriz *matriz, size_t i, size_t j, float valor) {
     // if (i >= matriz->linhas || j >= matriz->colunas) {
     //     return;
     // }
-    matriz->dados[i + j*matriz->colunas] = valor;
+    matriz->dados[i + j*matriz->linhas] = valor;
 }
 
 void print_matriz(Matriz *matriz) {
@@ -50,6 +54,7 @@ void print_matriz(Matriz *matriz) {
         }
         printf("\n");
     }
+    printf("\n");
 }
 
 void copiar_matriz(Matriz *matriz_origem, Matriz *matriz_destino) {
@@ -73,4 +78,11 @@ Matriz * inicializa_matriz_copiar(Matriz *matriz_origem) {
 
 void set_matriz_zero(Matriz *matriz) {
     memset(matriz->dados, 0, matriz->linhas * matriz->colunas);
+}
+
+void print_array(float *array, size_t size) {
+    for (size_t i = 0; i < size; i++) {
+        printf("%f  ", array[i]);
+    }
+    printf("\n");
 }

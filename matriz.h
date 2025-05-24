@@ -16,7 +16,9 @@ Matriz * inicializa_matriz_copia(Matriz *matriz_origem);
 void free_matriz(Matriz *matriz);
 
 float get_elemento_matriz(Matriz *matriz, size_t i, size_t j);
+float *get_ponteiro_elemento_matriz(Matriz *matriz, size_t i, size_t j);
 void set_elemento_matriz(Matriz *matriz, size_t i, size_t j, float valor);
 void set_matriz_zero(Matriz *matriz);
 
 void print_matriz(Matriz *matriz);
+void print_array(float *array, size_t size);

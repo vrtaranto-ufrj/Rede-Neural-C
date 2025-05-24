@@ -28,7 +28,9 @@ void inicializa_pesos_random(RedeNeural *rede_neural) {
 }
 
 RedeNeural* cria_rede_neural(
+    float passo,
     size_t num_camadas,
+    size_t num_epocas,
     size_t *neuronios_por_camada
 ) {
     if (num_camadas < 2) {
@@ -75,6 +77,8 @@ RedeNeural* cria_rede_neural(
     rede_neural->num_entradas = neuronios_por_camada[0];
     rede_neural->num_saidas = neuronios_por_camada[num_camadas - 1];
     rede_neural->num_camadas = num_camadas;
+    rede_neural->passo = passo;
+    rede_neural->num_epocas = num_epocas;
 
     rede_neural->funcoes_ativacao_neuronios = (float(**)(float)) malloc(sizeof(float(*)(float)) * rede_neural->num_neuronios);
     if (rede_neural->funcoes_ativacao_neuronios == NULL) {
@@ -95,7 +99,7 @@ RedeNeural* cria_rede_neural(
 
     for (size_t i = 0; i < rede_neural->num_neuronios; i++) {
         rede_neural->funcoes_ativacao_neuronios[i] = retificadora;
-        rede_neural->funcoes_ativacao_neuronios[i] = d_retificadora;    
+        rede_neural->derivada_funcoes_ativacao_neuronios[i] = d_retificadora;    
     }
     
     inicializa_pesos_random(rede_neural);
@@ -103,30 +107,128 @@ RedeNeural* cria_rede_neural(
     return rede_neural;
 }
 
+void fit_rede_neural(RedeNeural *rede_neural, Matriz *X_entrada, Matriz *Y_saida) {
+    float *integracao, *saida, *delta;
+    Matriz *pesos_temp;
+    
+    integracao = malloc(sizeof(float) * rede_neural->num_neuronios);
+    saida = malloc(sizeof(float) * rede_neural->num_neuronios);
+    delta = calloc(sizeof(float), rede_neural->num_neuronios);
+    pesos_temp = inicializa_matriz(
+        rede_neural->pesos_neuronio->linhas,
+        rede_neural->pesos_neuronio->colunas
+    );
+
+    for (size_t epoca = 0; epoca < rede_neural->num_epocas; epoca++) {
+        // print_matriz(pesos_temp);
+        for (size_t rotulo = 0; rotulo < X_entrada->linhas; rotulo++) {
+            gerar_saida(
+                rede_neural,
+                X_entrada,
+                integracao,
+                saida,
+                rotulo
+            );
+
+            size_t neuronio_atual = rede_neural->num_neuronios;
+            float erro;
+            do {
+                neuronio_atual--;
+
+                if (neuronio_atual >= rede_neural->num_neuronios - rede_neural->num_saidas) {
+                    erro = get_elemento_matriz(Y_saida, rotulo, rede_neural->num_neuronios - neuronio_atual - 1) - saida[neuronio_atual];
+                } else {
+                    erro = 0;
+                    for (size_t vizinho = 0; vizinho < rede_neural->num_neuronios; vizinho++) {
+                        if (
+                            rede_neural->camada_neuronios[vizinho] == rede_neural->camada_neuronios[neuronio_atual] + 1
+                            &&
+                            !rede_neural->is_bias[vizinho]
+                        ){
+                        erro += get_elemento_matriz(rede_neural->pesos_neuronio, neuronio_atual, vizinho) * delta[vizinho];
+                        }
+                    }
+                }
+                delta[neuronio_atual] = rede_neural->derivada_funcoes_ativacao_neuronios[neuronio_atual](integracao[neuronio_atual]) * erro;
+
+                for (size_t aresta = 0; aresta < rede_neural->num_neuronios; aresta++) {
+                    if (rede_neural->camada_neuronios[aresta] == rede_neural->camada_neuronios[neuronio_atual] - 1) {
+                        set_elemento_matriz(
+                            pesos_temp,
+                            aresta,
+                            neuronio_atual,
+                            get_elemento_matriz(
+                                rede_neural->pesos_neuronio,
+                                aresta,
+                                neuronio_atual
+                            ) + rede_neural->passo * delta[neuronio_atual] * saida[aresta]
+                        );
+                    }
+                }
+
+            } while (neuronio_atual);
+            copiar_matriz(pesos_temp, rede_neural->pesos_neuronio);
+        }
+    }
+
+    free(integracao);
+    free(saida);
+}
+
+void predict_rede_neural(RedeNeural *rede_neural, Matriz *X_entrada, Matriz *Y_saida) {
+    float *integracao, *saida;
+    size_t rotulo;
+    
+    integracao = malloc(sizeof(float) * rede_neural->num_neuronios);
+    saida = malloc(sizeof(float) * rede_neural->num_neuronios);
+
+    for (size_t rotulo = 0; rotulo < X_entrada->linhas; rotulo++) {
+        gerar_saida(rede_neural, X_entrada, integracao, saida, rotulo);
+
+        for (size_t i = 0; i < rede_neural->num_saidas; i++) {
+            size_t idx = rede_neural->num_neuronios - rede_neural->num_saidas + (rede_neural->num_saidas - i - 1);
+            set_elemento_matriz(Y_saida, rotulo, i, saida[idx]);
+        }
+    }
+
+    free(integracao);
+    free(saida);
+}
+
 void gerar_saida(
     RedeNeural *rede_neural,
     Matriz *X_entrada,
     float *integracao_neuronios,
-    float *saida_neuronios
+    float *saida_neuronios,
+    size_t rotulo
 ) {
-    for (size_t rotulo = 0; rotulo < X_entrada->linhas; rotulo++) {
-        memset(integracao_neuronios, 0, rede_neural->num_neuronios);
-        memset(saida_neuronios, 0, rede_neural->num_neuronios);
+    memset(integracao_neuronios, 0, rede_neural->num_neuronios * sizeof(float));
+    memset(saida_neuronios, 0, rede_neural->num_neuronios * sizeof(float));
 
-        saida_neuronios[0] = 1;
-        for (size_t neuronio_entrada = 1; neuronio_entrada <= rede_neural->num_entradas; neuronio_entrada++) {
-            saida_neuronios[neuronio_entrada] = get_elemento_matriz(X_entrada, rotulo, neuronio_entrada - 1);
+    saida_neuronios[0] = 1;
+    for (size_t i = 1; i < rede_neural->num_neuronios; i++) {
+        if (rede_neural->is_bias[i]) {
+            saida_neuronios[i] = 1;
+        }
+        else if (rede_neural->camada_neuronios[i] == 0) {
+            saida_neuronios[i] = get_elemento_matriz(X_entrada, rotulo, i - 1);
+        }
+    }
+
+    for (size_t camada = 1; camada < rede_neural->num_camadas; camada++) {
+
+        for (size_t i = 0; i < rede_neural->num_neuronios; i++) {
+            if (rede_neural->camada_neuronios[i] == camada && !rede_neural->is_bias[i]) {  // Tirando os bias pra agilzar
+                for (size_t aresta = 0; aresta < rede_neural->num_neuronios; aresta++) {
+                    integracao_neuronios[i] += saida_neuronios[aresta] * get_elemento_matriz(rede_neural->pesos_neuronio, aresta, i);
+                }
+            }
         }
 
-        for (size_t camada = 1; camada < rede_neural->num_camadas; camada++) {
-
-            for (size_t i = 0; i < rede_neural->num_neuronios; i++) {
-                if (rede_neural->camada_neuronios[i] == camada && !rede_neural->is_bias[i]) {
-                    for (size_t aresta = 0; aresta < rede_neural->num_neuronios; aresta++) {
-                        integracao_neuronios[i] += saida_neuronios[aresta] * get_elemento_matriz(rede_neural->pesos_neuronio, aresta, i);
-                    }
-                }
-            }   
+        for (size_t i = 0; i < rede_neural->num_neuronios; i++) {
+            if (rede_neural->camada_neuronios[i] == camada && !rede_neural->is_bias[i]) {
+                saida_neuronios[i] = rede_neural->funcoes_ativacao_neuronios[i](integracao_neuronios[i]);
+            }
         }
     }
 }
