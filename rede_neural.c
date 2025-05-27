@@ -226,7 +226,6 @@ void fit_rede_neural(RedeNeural *rede_neural, Matriz *X_entrada, Matriz *Y_saida
 
 void predict_rede_neural(RedeNeural *rede_neural, Matriz *X_entrada, Matriz *Y_saida) {
     float *integracao, *saida;
-    size_t rotulo;
     
     integracao = malloc(sizeof(float) * rede_neural->num_neuronios);
     saida = malloc(sizeof(float) * rede_neural->num_neuronios);

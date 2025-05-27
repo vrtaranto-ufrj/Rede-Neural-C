@@ -5,22 +5,23 @@
 
 #include "read_iris.h"
 
-const char const *iris_types[] = {
+char const *iris_types[] = {
     "Iris-setosa",
     "Iris-versicolor",
     "Iris-virginica"
 };
 
-int idx_iris_saida(const char const *iris) {
+int idx_iris_saida(char const *iris) {
     for (int idx = 0; idx < NUM_IRIS; idx++) {
         if (!strcmp(iris, iris_types[idx])) {
             return idx;
         }
     }
+    return -1;
 }
 
 void preenche_matrizes_iris(
-    const char const *nome_arquivo,
+    char const *nome_arquivo,
     int num_rotulos,
     Matriz **X_entrada,
     Matriz **Y_saida
@@ -35,7 +36,7 @@ void preenche_matrizes_iris(
     
     for (int linha = 0; linha < num_rotulos; linha++) {
         coluna = 0;
-        fgets(buffer, BUFFER_SIZE, arquivo_iris);
+        if (fgets(buffer, BUFFER_SIZE, arquivo_iris) == NULL) {}
         buffer[strcspn(buffer, "\n")] = '\0';
         inicio = buffer;
         for (int virgula_atual = 0; virgula_atual <= NUM_ENTRADAS; virgula_atual++) {
@@ -67,7 +68,7 @@ void preenche_matrizes_iris(
 }
 
 float calcular_acuracia(Matriz *ground_truth, Matriz *resposta_rede) {
-    float acuracia = 0, acertou;
+    float acuracia = 0;
     int maior_truth, maior_resp;
     float maior_truth_v, maior_resp_v;
 

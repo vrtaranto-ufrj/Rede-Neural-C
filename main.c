@@ -14,7 +14,7 @@ int main(int argc, char const *argv[]) {
     size_t camadas[] = {4, 2, 3};
     size_t num_camadas = sizeof(camadas) / sizeof(size_t);
 
-    RedeNeural *rede = cria_rede_neural(0.02, num_camadas, 5000, camadas);
+    RedeNeural *rede = cria_rede_neural(0.02, num_camadas, 10000, camadas);
     print_matriz(rede->pesos_neuronio);
 
     fit_rede_neural(rede, x, y);

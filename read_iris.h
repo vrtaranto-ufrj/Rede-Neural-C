@@ -6,10 +6,10 @@
 #define BUFFER_SIZE 1024
 #define NUM_IRIS 3  // 3 classes "Iris-setosa", "Iris-versicolor", "Iris-virginica"
 
-int idx_iris_saida(const char const *iris);
+int idx_iris_saida(char const *iris);
 
 void preenche_matrizes_iris(
-    const char const *nome_arquivo,
+    char const *nome_arquivo,
     int num_rotulos,
     Matriz **X_entrada,
     Matriz **Y_saida
